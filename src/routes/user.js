@@ -20,7 +20,7 @@ function isValidPassword(pwd, hash) {
   return new Promise((res, rej) => {
     bcrypt.compare(pwd, hash, (err, suc) => {
       if (err || !suc)
-        rej(err);
+        rej({...err, wrongPassword: true});
       else
         res(suc);
     });
@@ -68,13 +68,12 @@ module.exports = function (passport) {
     const password = req.value.password;
     try {
       let exist = await db.userExist('mail', mail);
-      console.log(exist);
       if (exist)
         return res.status(409).send({ error: 'user already exist or an error occured' });
       await db.addUser(mail, await hashPassword(password));
     } catch (e) {
       console.error(e);
-      return res.status(httpStatus.INTERNAL_SERVER_ERROR).end();
+      return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({error: 'Internal server error'});
     }
     return res.status(httpStatus.OK).end();
   });
@@ -112,8 +111,9 @@ module.exports = function (passport) {
       res.status(httpStatus.OK).end();
     } catch (e) {
       console.error(e);
-      if (e.noResult) return res.status(httpStatus.BAD_REQUEST).end();
-      res.status(httpStatus.INTERNAL_SERVER_ERROR).end();
+      if (e.wrongPassword) return res.status(httpStatus.UNAUTHORIZED).send({error: 'password doesn\'t match'});
+      if (e.noResult) return res.status(httpStatus.BAD_REQUEST).send({error: 'User not found'});
+      return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({error: 'Internal server error'});
     }
   });
 
