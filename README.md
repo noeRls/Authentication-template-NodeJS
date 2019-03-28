@@ -21,7 +21,7 @@ Start mongodb.
 
 ## Environment
 Here is multiple environment variable that need to be setup (_default value in docker-compose.yml_):
-- CORS_WHITELIST=https://demo.sst-consortium.com
+- CORS_WHITELIST=https://google.com
 - MONGODB_ENDPOINT=mongo:27017
 - MONGODB_USERNAME=root
 - MONGODB_PASSWORD=password
