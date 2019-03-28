@@ -26,12 +26,7 @@ const userSchema = new mongoose.Schema({
   password: String,
 });
 
-const consortiumSchema = new mongoose.Schema({
-  collaborators: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}]
-});
-
 const User = mongoose.model('User', userSchema);
-const Consortium = mongoose.model('Consortium', consortiumSchema);
 
 async function resetDb() {
   await User.remove({});
