@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  mongo:
+    image:  mongo
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+
+  server:
+    build: .
+    environment:
+      - CORS_WHITELIST=https://google.com
+      - MONGODB_ENDPOINT=mongo:27017
+      - MONGODB_USERNAME=root
+      - MONGODB_PASSWORD=password
+      - WAIT_HOSTS=mongo:27017
+      - DOMAIN=.
+    links:
+      - mongo
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongo

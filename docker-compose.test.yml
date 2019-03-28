@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+
+  server:
+    command: sh -c "/wait && mocha tests/user.js tests/info.js tests/scene.js --exit"
+
+  mongo:
+    logging:
+      driver: none
