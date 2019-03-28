@@ -5,7 +5,7 @@ services:
   server:
     build: .
     environment:
-      - CORS_WHITELIST=http://localhost:5000,http://localhost:3000,https://demo.sst-consortium.com
+      - CORS_WHITELIST=http://localhost:5000,http://localhost:3000
     volumes:
       - ./src/:/app/src/:Z
     command: sh -c "/wait && nodemon /app/src/server"
