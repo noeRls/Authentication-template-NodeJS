@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const {DatabaseError} = require('../errors');
 
 const dbName = 'simple_login';
 if (!process.env.MONGODB_ENDPOINT || !process.env.MONGODB_USERNAME || !process.env.MONGODB_PASSWORD)
@@ -28,34 +29,38 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-async function resetDb() {
-  await User.remove({});
-  await Consortium.remove({});
+async function handleError(promise)
+{
+  try {
+    return await promise;
+  } catch (e) {
+    throw new DatabaseError(DatabaseError.Types.internalError, e);
+  }
 }
 
 function addUser(mail, password) {
   const u = new User({ mail, password });
-  return u.save();
+  return handleError(u.save());
 }
 
 async function getUserFromField(field, value) {
-  let u = await User.findOne({ [field]: value });
+  let u = await handleError(User.findOne({ [field]: value }));
   if (!u)
-    throw {noResult: true};
+    throw new DatabaseError(DatabaseError.Types.noResult);
   return u;
 }
 
 async function userExist(field, value)
 {
-  let u = await User.findOne({ [field]: value });
+  let u = await handleError(User.findOne({ [field]: value }));
   if (u) return true;
   else return false;
 }
 
 function modifyUserPassword(id, pwd)
 {
-  return User.findOneAndUpdate({'_id': id}, {'password': pwd});
+  return handleError(User.findOneAndUpdate({'_id': id}, {'password': pwd}));
 }
 module.exports = {
-  resetDb, addUser, getUserFromField, modifyUserPassword, userExist
+  addUser, getUserFromField, modifyUserPassword, userExist
 };

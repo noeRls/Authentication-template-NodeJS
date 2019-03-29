@@ -6,11 +6,12 @@ const {validating, logged} = require('../middleware');
 const Joi = require('joi');
 const httpStatus = require('http-status-codes');
 const db = require('../db/models');
+const {DatabaseError, PasswordError} = require('../errors');
 
 function hashPassword(pwd) {
   return new Promise((res, rej) => bcrypt.hash(pwd, saltRounds, (err, hash) => {
     if (err)
-      rej(err);
+      rej(new PasswordError(PasswordError.Types.hashFailed, err));
     else
       res(hash);
   }));
@@ -20,7 +21,7 @@ function isValidPassword(pwd, hash) {
   return new Promise((res, rej) => {
     bcrypt.compare(pwd, hash, (err, suc) => {
       if (err || !suc)
-        rej({...err, wrongPassword: true});
+        rej(new PasswordError(PasswordError.Types.noMatch, err));
       else
         res(suc);
     });
@@ -29,7 +30,7 @@ function isValidPassword(pwd, hash) {
 
 const userschema = Joi.object().keys({
   mail: Joi.string().email().required(),
-  password: Joi.string().min(3).required(),
+  password: Joi.string().min(6).required(),
 });
 
 module.exports = function (passport) {
@@ -41,14 +42,17 @@ module.exports = function (passport) {
         user = await db.getUserFromField('mail', mail);
       }
       catch (e) {
-        return done(null, false, { message: 'Incorrect mail.' });
+        if (e.name === 'DatabaseError' && e.type === DatabaseError.Types.noResult)
+          return done(null, false, { error: 'Incorrect mail.' });
+        else
+          return done(e, false, {error: 'Internal server error'});
       }
       isValidPassword(password, user.password)
         .then(() => {
           done(null, user);
         })
-        .catch(e => {
-          done(e, false, { message: 'Incorrect password.', error: e });
+        .catch(() => {
+          done(null, false, { error: 'Incorrect password.' });
         });
     })
   );
@@ -60,7 +64,12 @@ module.exports = function (passport) {
   passport.deserializeUser(function (id, done) {
     db.getUserFromField('_id', id)
       .then(u => done(null, u))
-      .catch(() => done(null, null));
+      .catch((e) => {
+        if (e.name === 'DatabaseError' && e.type === DatabaseError.Types.noResult)
+          done(null, null);
+        else
+          done(e, null);
+      });
   });
 
   routes.post('/register', validating(userschema), async (req, res) => {
@@ -79,7 +88,7 @@ module.exports = function (passport) {
   });
 
   //Login using passport middleware
-  routes.post('/login',
+  routes.post('/login', validating(userschema),
     passport.authenticate('local'),
     (req, res) => {
       res.status(httpStatus.OK).send(req.user);
@@ -95,8 +104,8 @@ module.exports = function (passport) {
   });
 
   const changePasswordSchema = Joi.object().keys({
-    lastPassword: Joi.string().min(1).required(),
-    newPassword: Joi.string().min(1).required(),
+    lastPassword: Joi.string().min(6).required(),
+    newPassword: Joi.string().min(6).required(),
   });
 
   routes.post('/changepassword', logged, validating(changePasswordSchema), async (req, res) => {
@@ -110,9 +119,10 @@ module.exports = function (passport) {
       await db.modifyUserPassword(user.id, newhash);
       res.status(httpStatus.OK).end();
     } catch (e) {
-      console.error(e);
-      if (e.wrongPassword) return res.status(httpStatus.UNAUTHORIZED).send({error: 'password doesn\'t match'});
-      if (e.noResult) return res.status(httpStatus.BAD_REQUEST).send({error: 'User not found'});
+      if (e.name === 'DatabaseError' && e.type === DatabaseError.Types.noResult)
+        return res.status(httpStatus.BAD_REQUEST).send({error: 'User not found'});
+      if (e.name === 'PasswordError' && e.type === PasswordError.Types.noMatch)
+        return res.status(httpStatus.UNAUTHORIZED).send({error: 'password doesn\'t match'});
       return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({error: 'Internal server error'});
     }
   });
