@@ -3,7 +3,9 @@ version: '3'
 services:
 
   server:
-    command: sh -c "/wait && mocha tests/authentification.js tests/template.js --exit --abort-on-container-exit"
+    command: sh -c "/wait && mocha tests/authentification.js tests/health.js tests/template.js --exit --abort-on-container-exit"
+    environment:
+      - TEST=true
 
   mongo:
     logging:

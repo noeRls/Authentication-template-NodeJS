@@ -1,5 +1,6 @@
 const server = require('../src/server');
 const request = require('supertest')(server);
+const {beforeEachLog, afterEachLog} = require('./logs');
 
 let cookies = null;
 let mail = 'noe@gmail.com';
@@ -11,6 +12,15 @@ let mail2 = 'everyone@gmail.com';
 let password2 = 'superpassword';
 
 describe('authentification tests', () => {
+
+  beforeEach(function() {
+    beforeEachLog();
+  });
+
+  afterEach(function() {
+    afterEachLog(this.currentTest.state);
+  });
+
   it('can register', done => {
     request
       .post('/register')

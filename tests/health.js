@@ -1,11 +1,8 @@
 const server = require('../src/server');
 const request = require('supertest')(server);
-const getCookies = require('./getCookies');
 const { beforeEachLog, afterEachLog } = require('./logs');
 
-let cookies = null;
-
-describe('test template', () => {
+describe('basic tests', () => {
 
   beforeEach(() => {
     beforeEachLog();
@@ -15,14 +12,9 @@ describe('test template', () => {
     afterEachLog(this.currentTest.state);
   });
 
-  before(async () => {
-    cookies = await getCookies(request);
-  });
-
-  it('can do logged request', done => {
+  it('is in healthy state', done => {
     request
-      .get('/me')
-      .set('Cookie', cookies)
+      .get('/health')
       .expect(200, done);
   });
 });

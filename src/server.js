@@ -9,10 +9,12 @@ const helmet = require('helmet');
 const passport = require('passport');
 const cookies = require('cookie-session');
 
+const logger = require('./tools/logger');
+
 let allowedCORS;
 
 if (process.env.CORS_WHITELIST) [allowedCORS] = papa.parse(process.env.CORS_WHITELIST).data;
-else console.warn('no allowed CORS found');
+else logger.warn('no allowed CORS found');
 
 app.use((req, res, next) => {
   const { origin } = req.headers;
@@ -46,14 +48,21 @@ app.use(cookies({
 
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(morgan('dev'));
+app.use(morgan('dev', {
+  skip: (req) => {
+    if (req.url === '/health') return true;
+    return false;
+  },
+  stream: logger.stream,
+}));
 
 app.use(require('./routes/user')(passport));
+app.use(require('./routes/health')());
 
 app.get('/helloworld', (req, res) => {
   res.status(200).send('Hello, world!');
 });
 
-app.listen(8081, () => console.log('Listening on 8081'));
+app.listen(8081, () => logger.info('Listening on 8081'));
 
 module.exports = app;

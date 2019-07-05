@@ -1,13 +1,15 @@
 const routes = require('express').Router();
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcryptjs');
-
-const saltRounds = 10;
 const Joi = require('joi');
 const httpStatus = require('http-status-codes');
+
 const { validating, logged } = require('../middleware');
 const db = require('../db/models');
+const logger = require('../tools/logger');
 const { PasswordNoMatch, PasswordHashFailed, DbNoResult } = require('../errors');
+
+const saltRounds = 10;
 
 function hashPassword(pwd) {
   return new Promise((res, rej) => bcrypt.hash(pwd, saltRounds, (err, hash) => {
@@ -74,7 +76,7 @@ module.exports = (passport) => {
       if (exist) return res.status(409).send({ error: 'user already exist or an error occured' });
       await db.addUser(mail, await hashPassword(password));
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: 'Internal server error' });
     }
     return res.status(httpStatus.OK).end();

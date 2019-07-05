@@ -22,3 +22,6 @@ chrome-user-data
 .vscode
 *.swp
 *.swo
+console.log
+error.log
+debug.log

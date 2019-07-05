@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 const { DbNoResult } = require('../errors');
+const logger = require('../tools/logger');
 
 const dbName = 'simple_login';
-if (!process.env.MONGODB_ENDPOINT || !process.env.MONGODB_USERNAME || !process.env.MONGODB_PASSWORD) console.error('invalid mongodb conf');
+if (!process.env.MONGODB_ENDPOINT || !process.env.MONGODB_USERNAME || !process.env.MONGODB_PASSWORD) logger.error('invalid mongodb conf');
 let endpoint = `mongodb://${process.env.MONGODB_ENDPOINT}`;
 if (endpoint[endpoint.length - 1] !== '/') endpoint += '/';
 endpoint += `${dbName}?authSource=admin`;
@@ -17,9 +18,9 @@ mongoose.set('useFindAndModify', false);
 
 const db = mongoose.connection;
 
-db.on('error', console.error.bind(console, 'connection error:'));
+db.on('error', e => logger.error(e));
 db.once('open', () => {
-  console.log('Connected to db');
+  logger.info('Connected to db');
 });
 
 const userSchema = new mongoose.Schema({
