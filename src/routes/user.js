@@ -4,8 +4,8 @@ const bcrypt = require('bcryptjs');
 const Joi = require('joi');
 const httpStatus = require('http-status-codes');
 
-const { validating, logged } = require('../middleware');
-const db = require('../db/models');
+const { validating, logged } = require('../tools/middleware');
+const db = require('../db');
 const logger = require('../tools/logger');
 const { PasswordNoMatch, PasswordHashFailed, DbNoResult } = require('../errors');
 

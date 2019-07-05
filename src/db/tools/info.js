@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const { mongoose } = require('../core/connection');
 
 function isConnected() {
   return Boolean(mongoose.connection.readyState);
