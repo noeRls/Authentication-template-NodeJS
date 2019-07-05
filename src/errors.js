@@ -1,39 +1,40 @@
-const typeHandler = {
-  get: (obj, prop) => {
-    if (!obj[prop])
-      console.error(`Unkown type: ${prop}\nPossible type are: ${obj}`);
-    return obj[prop];
+class AppError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = this.constructor.name;
+    Error.captureStackTrace(this, this.constructor);
   }
+}
+
+class DbError extends AppError {
+}
+
+class DbNoResult extends DbError {
+  constructor() {
+    super('No result found');
+  }
+}
+
+class PasswordError extends AppError {
+}
+
+class PasswordNoMatch extends PasswordError {
+  constructor() {
+    super('Password don\'t match');
+  }
+}
+
+class PasswordHashFailed extends PasswordError {
+  constructor() {
+    super('Failed to hash password');
+  }
+}
+
+module.exports = {
+  AppError,
+  DbError,
+  DbNoResult,
+  PasswordError,
+  PasswordNoMatch,
+  PasswordHashFailed,
 };
-
-class DatabaseError extends Error {
-  constructor(type = DatabaseError.Types.unknown, message) {
-    super(message);
-    this.name = 'DatabaseError';
-    this.type = type;
-    this.message = message;
-  }
-}
-
-DatabaseError.Types = new Proxy({
-  noResult: 'noResult',
-  internalError: 'internalError',
-  unknown: 'unknown',
-}, typeHandler);
-
-class PasswordError extends Error {
-  constructor(type = PasswordError.Types.unknown, message) {
-    super(message);
-    this.name = 'PasswordError';
-    this.type = type;
-    this.message = message;
-  }
-}
-
-PasswordError.Types = new Proxy({
-  unknown: 'unknown',
-  noMatch: 'noMatch',
-  hashFailed: 'hashFailed'
-}, typeHandler);
-
-module.exports = { DatabaseError, PasswordError };

@@ -3,29 +3,27 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const bodyparser = require('body-parser');
+
 const app = express();
 const helmet = require('helmet');
 const passport = require('passport');
 const cookies = require('cookie-session');
 
-let allowedCORS = undefined;
+let allowedCORS;
 
-if (process.env.CORS_WHITELIST)
-  allowedCORS = papa.parse(process.env.CORS_WHITELIST).data[0];
-else
-  console.warn('no allowed CORS found');
+if (process.env.CORS_WHITELIST) [allowedCORS] = papa.parse(process.env.CORS_WHITELIST).data;
+else console.warn('no allowed CORS found');
 
 app.use((req, res, next) => {
-  const origin = req.headers.origin;
+  const { origin } = req.headers;
 
-  if (allowedCORS && allowedCORS.indexOf(origin) > -1)
-    res.setHeader('Access-Control-Allow-Origin', origin);
+  if (allowedCORS && allowedCORS.indexOf(origin) > -1) res.setHeader('Access-Control-Allow-Origin', origin);
 
   res.header('Access-Control-Allow-Credentials', 'true');
   res.header(
     'Access-Control-Allow-Headers',
-    'Origin, Content-Type, Authorization, ' +
-    'x-id, Content-Length, X-Requested-With'
+    'Origin, Content-Type, Authorization, '
+    + 'x-id, Content-Length, X-Requested-With',
   );
   res.header('Access-Control-Allow-Methods',
     'GET, POST, PUT, DELETE, OPTIONS');
@@ -40,10 +38,10 @@ app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: false }));
 
 app.use(cookies({
-  domain: process.env['DOMAIN'] || '.',
+  domain: process.env.DOMAIN || '.',
   name: 'session',
   keys: ['keyy1', 'keyy2'],
-  maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+  maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
 }));
 
 app.use(passport.initialize());
