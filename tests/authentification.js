@@ -1,6 +1,6 @@
 const server = require('../src/server');
 const request = require('supertest')(server);
-const {beforeEachLog, afterEachLog} = require('./logs');
+const { beforeEachLog, afterEachLog } = require('./logs');
 
 let cookies = null;
 let mail = 'noe@gmail.com';
@@ -13,18 +13,18 @@ let password2 = 'superpassword';
 
 describe('authentification tests', () => {
 
-  beforeEach(function() {
+  beforeEach(function () {
     beforeEachLog();
   });
 
-  afterEach(function() {
+  afterEach(function () {
     afterEachLog(this.currentTest.state);
   });
 
   it('can register', done => {
     request
       .post('/register')
-      .send({mail, password})
+      .send({ mail, password })
       .expect(200)
       .end((err) => {
         if (err) return done(err);
@@ -34,7 +34,7 @@ describe('authentification tests', () => {
   it('can login', done => {
     request
       .post('/login')
-      .send({mail, password})
+      .send({ mail, password })
       .expect(200)
       .end((err, res) => {
         if (err) return done(err);
@@ -65,7 +65,7 @@ describe('authentification tests', () => {
   it('can register n°2', done => {
     request
       .post('/register')
-      .send({mail: mail2, password: password2})
+      .send({ mail: mail2, password: password2 })
       .expect(200)
       .end((err) => {
         if (err) return done(err);
@@ -75,7 +75,7 @@ describe('authentification tests', () => {
   it('can login n°2', done => {
     request
       .post('/login')
-      .send({mail: mail2, password: password2})
+      .send({ mail: mail2, password: password2 })
       .expect(200)
       .end((err, res) => {
         if (err) return done(err);
@@ -106,25 +106,25 @@ describe('authentification tests', () => {
   it('failed register (duplicate)', done => {
     request
       .post('/register')
-      .send({mail, password})
+      .send({ mail, password })
       .expect(409, done);
   });
   it('faild register (weak password)', done => {
     request
       .post('/register')
-      .send({mail: 'imweak@gmail.com', password: 'hi'})
+      .send({ mail: 'imweak@gmail.com', password: 'hi' })
       .expect(400, done);
   });
   it('faild login (wrong mail)', done => {
     request
       .post('/login')
-      .send({mail: 'test@gmail.com', password})
+      .send({ mail: 'test@gmail.com', password })
       .expect(401, done);
   });
   it('faild login (wrong password)', done => {
     request
       .post('/login')
-      .send({mail, password: 'passisuperlepassword'})
+      .send({ mail, password: 'passisuperlepassword' })
       .expect(401, done);
   });
   it('can\'t get profile', done => {
@@ -135,20 +135,20 @@ describe('authentification tests', () => {
   it('can change password', done => {
     request
       .post('/changepassword')
-      .send({lastPassword: password, newPassword: newPwd})
+      .send({ lastPassword: password, newPassword: newPwd })
       .set('Cookie', cookies)
       .expect(200, done);
   });
   it('can\'t login with old password', done => {
     request
       .post('/login')
-      .send({mail, password})
+      .send({ mail, password })
       .expect(401, done);
   });
   it('can login with new password', done => {
     request
       .post('/login')
-      .send({mail, password: newPwd})
+      .send({ mail, password: newPwd })
       .expect(200)
       .end((err, res) => {
         if (err) return done(err);
@@ -159,7 +159,7 @@ describe('authentification tests', () => {
   it('can\'t change password (wrong password)', done => {
     request
       .post('/changepassword')
-      .send({lastPassword: 'randomfakepassword', newPassword: 'youwillnotbethepassword'})
+      .send({ lastPassword: 'randomfakepassword', newPassword: 'youwillnotbethepassword' })
       .set('Cookie', cookies2)
       .expect(401, done);
   });

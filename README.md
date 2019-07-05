@@ -93,6 +93,13 @@ returns:
 }
 ```
 
+### Health
+
+Route: `/health`
+Method `GET`
+
+Return `200` if the server is in an healthy state. Basicly if the server is connected to the database.
+
 # Infos
 
 ### Logged Middelware
@@ -116,7 +123,11 @@ You can easly setup you own tests to call your logged routes
 
 __Template is in `tests/template.js`__.
 
-### Write tests
+## Write tests
+
+### Authentificate user
+
+Authentification is done through cookies.
 
 getCookies function generate cookies automatically
 ```js
@@ -133,13 +144,51 @@ request
   .set('Cookie', cookies)
 ```
 
-### Run tests
+### Server logs
+
+Server logs are hide if test succeed. It allow you to debug easly and faster your project.
+
+Include:
+```js
+const { beforeEachLog, afterEachLog } = require('./logs');
+```
+
+Add in your test battery:
+```js
+  beforeEach(function() {
+    beforeEachLog();
+  });
+
+  afterEach(function() {
+    afterEachLog(this.currentTest.state);
+  });
+```
+
+## Run tests
 
 Run `yarn test` to run all tests. It will automatically reset the database.
 
 >Docker is required.
 
 _You can use your own script to reset the database and run mocha without docker !_
+
+# Eslint
+
+ESLint is an open source project, its goal is to provide a pluggable linting utility for JavaScript.
+
+> On this project airbnb's eslint configuration is used
+
+### Run linting
+
+Run `yarn lint` to have a linting report.
+
+# Logger
+
+A winston logger is present. It provide easly log manipulation / filtering and more flexibility like hiding logs during test.
+
+- Error log are present in `error.log`
+- Console like log are present in `console.log`
+- Debug log are present in `debug.log`
 
 # Contriute !
 
