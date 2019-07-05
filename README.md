@@ -7,7 +7,7 @@ Simple NodeJS server with express providing basic authentification with mongodb
 ### With Docker (_recommanded way_)
 
 run it:
-`docker-compose up`
+`docker-compose up` or `yarn start-docker`
 
 dev with hot reload on sources:
 `docker-compose -f docker-compose.yml -f docker-compose.dev.yml up`
