@@ -9,10 +9,8 @@ const db = require('../db');
 const logger = require('../tools/logger');
 const { PasswordNoMatch, PasswordHashFailed, DbNoResult } = require('../errors');
 
-const saltRounds = 10;
-
 function hashPassword(pwd) {
-  return new Promise((res, rej) => bcrypt.hash(pwd, saltRounds, (err, hash) => {
+  return new Promise((res, rej) => bcrypt.hash(pwd, bcrypt.genSaltSync(), (err, hash) => {
     if (err) rej(new PasswordHashFailed());
     else res(hash);
   }));
