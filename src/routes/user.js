@@ -115,6 +115,7 @@ module.exports = (passport) => {
     } catch (e) {
       if (e instanceof DbNoResult) return res.status(httpStatus.BAD_REQUEST).send({ error: 'User not found' });
       if (e instanceof PasswordNoMatch) return res.status(httpStatus.UNAUTHORIZED).send({ error: 'password doesn\'t match' });
+      logger.error(e);
       return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: 'Internal server error' });
     }
   });
